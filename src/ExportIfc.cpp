@@ -1,5 +1,6 @@
 #include"ExportIfc.h"
 #include"DB2Ifc.h"
+#include"Genifc.h"
 void convertPlacement(double local_x[3], double local_z[3], double location[3], shared_ptr<IfcAxis2Placement3D>& axis2placement3d, std::vector<shared_ptr<BuildingEntity> >& vec_new_entities)
 {
 	if (!axis2placement3d)
@@ -40,7 +41,7 @@ void convertPlacement(double local_x[3], double local_z[3], double location[3], 
 	axis2placement3d->m_RefDirection->m_DirectionRatios.push_back(shared_ptr<IfcReal>(new IfcReal(local_x[2])));
 }
 
-void ExportIfc::initIfcModel(shared_ptr<IfcReinforcingBar> bar, std::vector<shared_ptr<BuildingEntity>>& vec_new_entities)
+void ExportIfc::initIfcModel(std::vector<shared_ptr<BuildingEntity>>& vec_new_entities)
 {
 	//std::vector<shared_ptr<BuildingEntity>> vec_new_entities;//存放所有的ifc实体
 
@@ -53,72 +54,73 @@ void ExportIfc::initIfcModel(shared_ptr<IfcReinforcingBar> bar, std::vector<shar
 		ifc_model->setIfcProject(ifc_project);
 	}
 
-	shared_ptr<IfcSite> ifc_site(new IfcSite());
-	vec_new_entities.push_back(ifc_site);
+	////shared_ptr<IfcSite> ifc_site(new IfcSite());
+	////GenIfc::site = IfcSIUni
+	//vec_new_entities.push_back(ifc_site);
 
-	shared_ptr<IfcBuilding> ifc_building(new IfcBuilding());
-	vec_new_entities.push_back(ifc_building);
+	//shared_ptr<IfcBuilding> ifc_building(new IfcBuilding());
+	//vec_new_entities.push_back(ifc_building);
 
-	shared_ptr<IfcBuildingStorey> ifc_building_storey(new IfcBuildingStorey());
-	vec_new_entities.push_back(ifc_building_storey);
+	//shared_ptr<IfcBuildingStorey> ifc_building_storey(new IfcBuildingStorey());
+	//vec_new_entities.push_back(ifc_building_storey);
 
 	// relations object to connect site to project
 	shared_ptr<IfcRelAggregates> rel_aggregates_project_site(new IfcRelAggregates());
 	rel_aggregates_project_site->m_RelatingObject = ifc_project;
-	rel_aggregates_project_site->m_RelatedObjects.push_back(ifc_site);
+	rel_aggregates_project_site->m_RelatedObjects.push_back(DB2Ifc::site);
 	vec_new_entities.push_back(rel_aggregates_project_site);
 
 	// relations object to connect building to site
-	shared_ptr<IfcRelAggregates> rel_aggregates_site_building(new IfcRelAggregates());
-	rel_aggregates_site_building->m_RelatingObject = ifc_site;
-	rel_aggregates_site_building->m_RelatedObjects.push_back(ifc_building);
-	vec_new_entities.push_back(rel_aggregates_site_building);
+	//shared_ptr<IfcRelAggregates> rel_aggregates_site_building(new IfcRelAggregates());
+	//rel_aggregates_site_building->m_RelatingObject = ifc_site;
+	//rel_aggregates_site_building->m_RelatedObjects.push_back(ifc_building);
+	//vec_new_entities.push_back(rel_aggregates_site_building);
 
-	// relations object to connect building storey to building
-	shared_ptr<IfcRelAggregates> rel_aggregates_building_buildingstorey(new IfcRelAggregates());
-	rel_aggregates_building_buildingstorey->m_RelatingObject = ifc_building;
-	rel_aggregates_building_buildingstorey->m_RelatedObjects.push_back(ifc_building_storey);
-	vec_new_entities.push_back(rel_aggregates_building_buildingstorey);
+	//// relations object to connect building storey to building
+	//shared_ptr<IfcRelAggregates> rel_aggregates_building_buildingstorey(new IfcRelAggregates());
+	//rel_aggregates_building_buildingstorey->m_RelatingObject = ifc_building;
+	//rel_aggregates_building_buildingstorey->m_RelatedObjects.push_back(ifc_building_storey);
+	//vec_new_entities.push_back(rel_aggregates_building_buildingstorey);
 
-	// relations object to connect wall to building storey
-	shared_ptr<IfcRelContainedInSpatialStructure> rel_contained_buildingstorey_wall(new IfcRelContainedInSpatialStructure());
-	rel_contained_buildingstorey_wall->m_RelatingStructure = ifc_building_storey;
-	rel_contained_buildingstorey_wall->m_RelatedElements.push_back(bar);
-	vec_new_entities.push_back(rel_contained_buildingstorey_wall);
+	//// relations object to connect wall to building storey
+	//shared_ptr<IfcRelContainedInSpatialStructure> rel_contained_buildingstorey_wall(new IfcRelContainedInSpatialStructure());
+	//rel_contained_buildingstorey_wall->m_RelatingStructure = ifc_building_storey;
+	//rel_contained_buildingstorey_wall->m_RelatedElements.push_back(bar);
+	//vec_new_entities.push_back(rel_contained_buildingstorey_wall);
 
 
-	// coordinate systems
-	double local_x[3] = { 1,0,0 };
-	double local_z[3] = { 0,0,1 };
-	double location[3] = { 0,0,0 };
+	//// coordinate systems
+	//double local_x[3] = { 1,0,0 };
+	//double local_z[3] = { 0,0,1 };
+	//double location[3] = { 0,0,0 };
 
-	// global placement
-	shared_ptr<IfcAxis2Placement3D> axis_placement_origin;
-	convertPlacement(local_x, local_z, location, axis_placement_origin, vec_new_entities);
-	shared_ptr<IfcLocalPlacement> global_placement(new IfcLocalPlacement());
-	vec_new_entities.push_back(global_placement);
-	global_placement->m_RelativePlacement = axis_placement_origin;
+	//// global placement
+	//shared_ptr<IfcAxis2Placement3D> axis_placement_origin;
+	//convertPlacement(local_x, local_z, location, axis_placement_origin, vec_new_entities);
+	//shared_ptr<IfcLocalPlacement> global_placement(new IfcLocalPlacement());
+	//vec_new_entities.push_back(global_placement);
+	//global_placement->m_RelativePlacement = axis_placement_origin;
 
-	// local placement of building
-	location[0] = 2.7;
-	shared_ptr<IfcAxis2Placement3D> axis_placement_building;
-	convertPlacement(local_x, local_z, location, axis_placement_building, vec_new_entities);
-	shared_ptr<IfcLocalPlacement> building_placement(new IfcLocalPlacement());
-	vec_new_entities.push_back(building_placement);
-	building_placement->m_PlacementRelTo = global_placement;
-	building_placement->m_RelativePlacement = axis_placement_building;
-	ifc_building->m_ObjectPlacement = building_placement;
+	//// local placement of building
+	//location[0] = 2.7;
+	//shared_ptr<IfcAxis2Placement3D> axis_placement_building;
+	//convertPlacement(local_x, local_z, location, axis_placement_building, vec_new_entities);
+	//shared_ptr<IfcLocalPlacement> building_placement(new IfcLocalPlacement());
+	//vec_new_entities.push_back(building_placement);
+	//building_placement->m_PlacementRelTo = global_placement;
+	//building_placement->m_RelativePlacement = axis_placement_building;
+	//ifc_building->m_ObjectPlacement = building_placement;
 
-	// local placement of wall
-	location[0] = 0.1;
-	location[1] = 3.0;
-	shared_ptr<IfcAxis2Placement3D> axis_placement_local;
-	convertPlacement(local_x, local_z, location, axis_placement_local, vec_new_entities);
-	shared_ptr<IfcLocalPlacement> wall_placement(new IfcLocalPlacement());
-	vec_new_entities.push_back(wall_placement);
-	wall_placement->m_PlacementRelTo = building_placement;
-	wall_placement->m_RelativePlacement = axis_placement_local;
-	bar->m_ObjectPlacement = wall_placement;
+	//// local placement of wall
+	//location[0] = 0.1;
+	//location[1] = 3.0;
+	//shared_ptr<IfcAxis2Placement3D> axis_placement_local;
+	//convertPlacement(local_x, local_z, location, axis_placement_local, vec_new_entities);
+	//shared_ptr<IfcLocalPlacement> wall_placement(new IfcLocalPlacement());
+	//vec_new_entities.push_back(wall_placement);
+	//wall_placement->m_PlacementRelTo = building_placement;
+	//wall_placement->m_RelativePlacement = axis_placement_local;
+	//bar->m_ObjectPlacement = wall_placement;
 
 
 	// general objects
@@ -170,7 +172,7 @@ void ExportIfc::initIfcModel(shared_ptr<IfcReinforcingBar> bar, std::vector<shar
 	geom_context->m_ContextType = shared_ptr<IfcLabel>(new IfcLabel(L"Model"));
 	geom_context->m_CoordinateSpaceDimension = shared_ptr<IfcDimensionCount>(new IfcDimensionCount(3));
 	geom_context->m_Precision = shared_ptr<IfcReal>(new IfcReal(1.000E-5));
-	geom_context->m_WorldCoordinateSystem = axis_placement_origin;
+	geom_context->m_WorldCoordinateSystem = DB2Ifc::placements[0];
 	vec_new_entities.push_back(geom_context);
 
 	ifc_project->m_UnitsInContext = unit_assignment;

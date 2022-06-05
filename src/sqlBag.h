@@ -45,9 +45,9 @@ public:
 			fprintf(stdout, "Insert Successfully!\n");
 		}
 	}
-	void SelectDb(std::string command,int(*callback)(void*, int, char**, char**), void*tmp) {
+	void SelectDb(std::string command,int(*callback)(void*, int, char**, char**), const char*tmp) {
 		char* errmsg = 0;
-		int rc = sqlite3_exec(db, command.data(), callback, tmp, &errmsg);
+		int rc = sqlite3_exec(db, command.data(), callback,(void*) tmp, &errmsg);
 		if (rc != SQLITE_OK) {
 			fprintf(stderr,"SELECT Failed!:%s\n", errmsg);
 			sqlite3_free(errmsg);

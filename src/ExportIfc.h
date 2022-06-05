@@ -68,7 +68,7 @@ public:
 	ExportIfc() {
 		ifc_model = make_shared<BuildingModel>();
 	}
-	void initIfcModel(shared_ptr<IfcReinforcingBar> bar, std::vector<shared_ptr<BuildingEntity>>& vec_new_entities);
+	void initIfcModel(std::vector<shared_ptr<BuildingEntity>>& vec_new_entities);
 	
 	void exportifc();
 	/*void handle(std::vector<shared_ptr<BuildingEntity>>& vec_new_entities) {

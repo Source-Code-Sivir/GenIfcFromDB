@@ -1,8 +1,9 @@
 #include"Genifc.h"
 //#pragma comment(lib,"IfcPlusPlus.dll")
 #include"DB2Ifc.h"
-namespace GenIfc {
-	std::shared_ptr<IfcCompositeCurveSegment> GenIfcCompositeCurveSegment(shared_ptr<IfcTransitionCode>m_Transition, bool m_SameSense, shared_ptr<IfcCurve> m_ParentCurve) {
+
+
+	std::shared_ptr<IfcCompositeCurveSegment> GenIfc::GenIfcCompositeCurveSegment(shared_ptr<IfcTransitionCode>m_Transition, bool m_SameSense, shared_ptr<IfcCurve> m_ParentCurve) {
 		shared_ptr<IfcCompositeCurveSegment> res = make_shared<IfcCompositeCurveSegment>();
 		res->m_Transition = m_Transition;
 		res->m_SameSense = make_shared<IfcBoolean>(m_SameSense);
@@ -10,7 +11,7 @@ namespace GenIfc {
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcCartesianPoint> GenIfcCartesianPoint(std::vector<double> &data) {
+	std::shared_ptr<IfcCartesianPoint> GenIfc::GenIfcCartesianPoint(std::vector<double> &data) {
 		shared_ptr<IfcCartesianPoint> point(new IfcCartesianPoint);
 		for (auto i : data) {
 			auto tmp = make_shared<IfcLengthMeasure>(i);
@@ -20,7 +21,7 @@ namespace GenIfc {
 		return point;
 	}
 
-	std::shared_ptr<IfcDirection> GenIfcDirection(std::vector<double> &data) {
+	std::shared_ptr<IfcDirection> GenIfc::GenIfcDirection(std::vector<double> &data) {
 		shared_ptr<IfcDirection> dir = make_shared<IfcDirection>();
 		//printf("\nsssss%d", dir->m_DirectionRatios.size());
 		for (auto &i : dir->m_DirectionRatios) {
@@ -33,7 +34,7 @@ namespace GenIfc {
 		return dir;
 	}
 
-	std::shared_ptr<IfcAxis2Placement3D> GenIfcAxis2Placement3D(shared_ptr<IfcCartesianPoint> &point, shared_ptr<IfcDirection>&dz, shared_ptr<IfcDirection>&dx) {
+	std::shared_ptr<IfcAxis2Placement3D> GenIfc::GenIfcAxis2Placement3D(shared_ptr<IfcCartesianPoint> &point, shared_ptr<IfcDirection>&dz, shared_ptr<IfcDirection>&dx) {
 		shared_ptr<IfcAxis2Placement3D> rec = make_shared<IfcAxis2Placement3D>();
 		rec->m_Location = point;
 		rec->m_Axis = dz;
@@ -42,7 +43,7 @@ namespace GenIfc {
 		return rec;
 	}
 
-	std::shared_ptr<IfcTrimmedCurve> GenIfcTrimmedCurve(shared_ptr<IfcCurve> &curve, double trim1, double trim2, bool direction, IfcTrimmingPreference::IfcTrimmingPreferenceEnum perf)
+	std::shared_ptr<IfcTrimmedCurve> GenIfc::GenIfcTrimmedCurve(shared_ptr<IfcCurve> &curve, double trim1, double trim2, bool direction, IfcTrimmingPreference::IfcTrimmingPreferenceEnum perf)
 		//目前只支持用para初始化，如果想用point来初始化请自己写重载函数
 	{
 		shared_ptr<IfcTrimmedCurve> res = make_shared<IfcTrimmedCurve>();
@@ -55,7 +56,7 @@ namespace GenIfc {
 		return res;
 	}
 
-	std::shared_ptr<IfcLine> GenIfcLine(shared_ptr<IfcCartesianPoint> &point, shared_ptr<IfcDirection>dir) {
+	std::shared_ptr<IfcLine> GenIfc::GenIfcLine(shared_ptr<IfcCartesianPoint> &point, shared_ptr<IfcDirection>dir) {
 		shared_ptr<IfcLine> res = make_shared<IfcLine>();
 		shared_ptr<IfcVector> vec = make_shared<IfcVector>();
 		vec->m_Magnitude = make_shared<IfcLengthMeasure>(1);
@@ -67,7 +68,7 @@ namespace GenIfc {
 		return res;
 	}
 
-	std::shared_ptr<IfcCircle> GenIfcCircle(double radius, shared_ptr<IfcAxis2Placement3D> &placement) {
+	std::shared_ptr<IfcCircle>GenIfc::GenIfcCircle(double radius, shared_ptr<IfcAxis2Placement3D> &placement) {
 		shared_ptr<IfcCircle> res = make_shared<IfcCircle>();
 		res->m_Position = placement;
 		res->m_Radius = make_shared<IfcPositiveLengthMeasure>(radius);
@@ -75,7 +76,7 @@ namespace GenIfc {
 		return res;
 	}
 
-	std::shared_ptr<IfcCompositeCurveSegment> GenIfcCompositeCurveSegment(IfcTransitionCode::IfcTransitionCodeEnum e, bool same, shared_ptr<IfcCurve> &curve) {
+	std::shared_ptr<IfcCompositeCurveSegment>GenIfc::GenIfcCompositeCurveSegment(IfcTransitionCode::IfcTransitionCodeEnum e, bool same, shared_ptr<IfcCurve> &curve) {
 		std::shared_ptr<IfcCompositeCurveSegment> res = make_shared<IfcCompositeCurveSegment>();
 		res->m_Transition = make_shared<IfcTransitionCode>(e);
 		res->m_SameSense = make_shared<IfcBoolean>(same);
@@ -83,7 +84,7 @@ namespace GenIfc {
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcCompositeCurve> GenIfcCompositeCurve(std::vector <shared_ptr<IfcCompositeCurveSegment>>& curv, LogicalEnum a) {
+	std::shared_ptr<IfcCompositeCurve> GenIfc::GenIfcCompositeCurve(std::vector <shared_ptr<IfcCompositeCurveSegment>>& curv, LogicalEnum a) {
 		shared_ptr<IfcCompositeCurve> res = make_shared<IfcCompositeCurve>();
 		res->m_Segments = curv;
 		res->m_SelfIntersect = make_shared<IfcLogical>(a);
@@ -91,7 +92,7 @@ namespace GenIfc {
 		return res;
 	}
 
-	std::shared_ptr<IfcSweptDiskSolid> GenIfcSweptDiskSolid(shared_ptr<IfcCurve> curve, double radius, double innerradius, double start, double end) {
+	std::shared_ptr<IfcSweptDiskSolid> GenIfc::GenIfcSweptDiskSolid(shared_ptr<IfcCurve> curve, double radius, double innerradius, double start, double end) {
 		shared_ptr<IfcSweptDiskSolid> res = make_shared<IfcSweptDiskSolid>();
 		res->m_Directrix = curve;
 		res->m_Radius = make_shared<IfcPositiveLengthMeasure>(radius);
@@ -105,7 +106,7 @@ namespace GenIfc {
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcShapeRepresentation> GenIfcShapeRepresentation(shared_ptr<IfcRepresentationContext> context, const char *m_RepresentationIdentifier, const char *
+	std::shared_ptr<IfcShapeRepresentation> GenIfc::GenIfcShapeRepresentation(shared_ptr<IfcRepresentationContext> context, const char *m_RepresentationIdentifier, const char *
 		m_RepresentationType, std::vector<shared_ptr<IfcRepresentationItem>>&m_Items) {
 		wchar_t tmp1[100],tmp2[100];
 		swprintf(tmp1, 100, L"%ws", m_RepresentationIdentifier);
@@ -121,12 +122,12 @@ namespace GenIfc {
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcRepresentationContext> GenIfcRepresentationContext() {
+	std::shared_ptr<IfcRepresentationContext> GenIfc::GenIfcRepresentationContext() {
 		shared_ptr<IfcRepresentationContext> res = make_shared<IfcRepresentationContext>();
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcGeometricRepresentationContext> GenIfcGeometricRepresentationContext(const char *m_ContextIdentifier, const char *m_ContextType, shared_ptr<IfcDimensionCount>m_CoordinateSpaceDimension, double precision, shared_ptr<IfcAxis2Placement> place, shared_ptr<IfcDirection> dir) {
+	std::shared_ptr<IfcGeometricRepresentationContext> GenIfc::GenIfcGeometricRepresentationContext(const char *m_ContextIdentifier, const char *m_ContextType, shared_ptr<IfcDimensionCount>m_CoordinateSpaceDimension, double precision, shared_ptr<IfcAxis2Placement> place, shared_ptr<IfcDirection> dir) {
 		wchar_t tmp1[100], tmp2[100];
 		swprintf(tmp1, 100, L"%ws", m_ContextIdentifier);
 		swprintf(tmp2, 100, L"%ws", m_ContextType);
@@ -143,31 +144,31 @@ namespace GenIfc {
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcRepresentationMap> GenIfcRepresentationMap(shared_ptr<IfcAxis2Placement3D> &origin, shared_ptr<IfcRepresentation> pre) {
+	std::shared_ptr<IfcRepresentationMap> GenIfc::GenIfcRepresentationMap(shared_ptr<IfcAxis2Placement3D> &origin, shared_ptr<IfcRepresentation> pre) {
 		shared_ptr<IfcRepresentationMap> res = make_shared<IfcRepresentationMap>();
 		res->m_MappingOrigin = origin;
 		res->m_MappedRepresentation = pre;
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcMappedItem> GenIfcMappedItem(shared_ptr<IfcRepresentationMap> map, shared_ptr<IfcCartesianTransformationOperator> pre) {
+	std::shared_ptr<IfcMappedItem> GenIfc::GenIfcMappedItem(shared_ptr<IfcRepresentationMap> map, shared_ptr<IfcCartesianTransformationOperator> pre) {
 		shared_ptr<IfcMappedItem> res = make_shared<IfcMappedItem>();
 		res->m_MappingSource = map;
 		res->m_MappingTarget = pre;
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcCartesianTransformationOperator> GenIfcCartesianTransformationOperator3D(shared_ptr<IfcDirection> d1, shared_ptr<IfcDirection>d2, shared_ptr<IfcCartesianPoint> point, shared_ptr<IfcReal> r,shared_ptr<IfcDirection> d3) {
+	std::shared_ptr<IfcCartesianTransformationOperator> GenIfc::GenIfcCartesianTransformationOperator3D(shared_ptr<IfcDirection>axis1, shared_ptr<IfcDirection>axis2, shared_ptr<IfcCartesianPoint> point, shared_ptr<IfcReal> real, shared_ptr<IfcDirection>axis3) {
 		shared_ptr<IfcCartesianTransformationOperator3D>res = make_shared<IfcCartesianTransformationOperator3D>();
-		res->m_Axis1 = d1;
-		res->m_Axis2 = d2;
+		res->m_Axis1 = axis1;
+		res->m_Axis2 = axis2;
 		res->m_LocalOrigin = point;
-		res->m_Scale = r;
-		res->m_Axis3 = d3;
+		res->m_Scale = real;
+		res->m_Axis3 = axis3;
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcProductDefinitionShape> GenIfcProductDefinitionShape(const char *name, const char *desc, std::vector<shared_ptr<IfcRepresentation>> repres) {
+	std::shared_ptr<IfcProductDefinitionShape> GenIfc::GenIfcProductDefinitionShape(const char *name, const char *desc, std::vector<shared_ptr<IfcRepresentation>> repres) {
 		wchar_t tmp1[100], tmp2[100];
 		swprintf(tmp1, 100, L"%ws", name);
 		swprintf(tmp2, 100, L"%ws", desc);
@@ -181,20 +182,27 @@ namespace GenIfc {
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcLocalPlacement> GenIfcLocalPlacement(shared_ptr<IfcObjectPlacement> localplace, shared_ptr<IfcAxis2Placement> place) {
+	std::shared_ptr<IfcLocalPlacement> GenIfc::GenIfcLocalPlacement(shared_ptr<IfcObjectPlacement> localplace, shared_ptr<IfcAxis2Placement> place) {
+
+		/*shared_ptr<IfcAxis2Placement3D> axis_placement_origin;
+		convertPlacement(local_x, local_z, location, axis_placement_origin, vec_new_entities);
+		shared_ptr<IfcLocalPlacement> global_placement(new IfcLocalPlacement());
+		vec_new_entities.push_back(global_placement);
+		global_placement->m_RelativePlacement = axis_placement_origin;*/
+
 		shared_ptr<IfcLocalPlacement> res = make_shared<IfcLocalPlacement>();
 		res->m_PlacementRelTo = localplace;
 		res->m_RelativePlacement = place;
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcReinforcingBar> GenIfcReinforcingBar(const char* id, shared_ptr<IfcOwnerHistory> owner,
+	std::shared_ptr<IfcReinforcingBar> GenIfc::GenIfcReinforcingBar(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
 		const char* name, const char* desc, const char* objtype, shared_ptr<IfcObjectPlacement> objplace,
 		shared_ptr<IfcProductRepresentation> repre, const char* tag, const char* steel,
 		double diameter, double area, double len,
-		IfcReinforcingBarTypeEnum predefinedtype, IfcReinforcingBarSurfaceEnum surface) {
+		IfcReinforcingBarTypeEnum predefinedtype, IfcReinforcingBarSurfaceEnum surface,int parentStoreyID) {
 		wchar_t tmp1[100], tmp2[100],tmp3[100],tmp4[100],tmp5[100],tmp6[100];
-		swprintf(tmp1, 100, L"%ws", id);
+		//swprintf(tmp1, 100, L"%ws", id);
 		swprintf(tmp2, 100, L"%ws", name);
 		swprintf(tmp3, 100, L"%ws", desc);
 		swprintf(tmp4, 100, L"%ws", objtype);
@@ -202,8 +210,8 @@ namespace GenIfc {
 		swprintf(tmp6, 100, L"%ws", steel);
 
 		shared_ptr<IfcReinforcingBar> res = make_shared<IfcReinforcingBar>();
-		if(!id)
-			res->m_GlobalId = make_shared<IfcGloballyUniqueId>(tmp1);
+		if(!globalID)
+			res->m_GlobalId = globalID;
 		res->m_OwnerHistory = owner;
 		if (!name)
 			res->m_Name = make_shared<IfcLabel>(tmp2);
@@ -226,6 +234,64 @@ namespace GenIfc {
 		res->m_PredefinedType = make_shared<IfcReinforcingBarTypeEnum>(predefinedtype);
 		res->m_BarSurface = make_shared<IfcReinforcingBarSurfaceEnum>(surface);
 		DB2Ifc::vec_new_entitys.push_back(res);
+
+		shared_ptr<IfcRelContainedInSpatialStructure> rel_contained_buildingstorey_wall(new IfcRelContainedInSpatialStructure());
+		rel_contained_buildingstorey_wall->m_RelatingStructure = DB2Ifc::BuildingStorey[parentStoreyID];
+		rel_contained_buildingstorey_wall->m_RelatedElements.push_back(res);
+		DB2Ifc::vec_new_entitys.push_back(rel_contained_buildingstorey_wall);
+
 		return res;
 	}
-}
+
+	std::shared_ptr<IfcBuilding> GenIfc::GenIfcBuilding(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
+		const char* name, const char* desc, const char* objtype, shared_ptr<IfcObjectPlacement> objplace) {
+		if (DB2Ifc::site == nullptr) {
+			DB2Ifc::site = make_shared<IfcSite>();
+			DB2Ifc::vec_new_entitys.push_back(DB2Ifc::site);
+		}
+
+		shared_ptr<IfcBuilding> res = make_shared<IfcBuilding>();
+		res->m_GlobalId = globalID;
+		shared_ptr<IfcRelAggregates> rel_aggregates_site_building(new IfcRelAggregates());
+		rel_aggregates_site_building->m_RelatingObject = DB2Ifc::site;
+		rel_aggregates_site_building->m_RelatedObjects.push_back(res);
+		DB2Ifc::vec_new_entitys.push_back(rel_aggregates_site_building);
+
+		if (!globalID)
+			//res->m_GlobalId = make_shared<IfcGloballyUniqueId>(tmp1);
+		res->m_OwnerHistory = owner;
+		if (!name)
+			//res->m_Name = make_shared<IfcLabel>(tmp2);
+		if (!desc)
+			//res->m_Description = make_shared<IfcText>(tmp3);
+		if (!objtype)
+			//res->m_ObjectType = make_shared<IfcLabel>(tmp4);
+		res->m_ObjectPlacement = objplace;
+		
+		DB2Ifc::vec_new_entitys.push_back(res);
+		return res;
+	}
+	std::shared_ptr<IfcBuildingStorey> GenIfc::GenIfcBuildingStorey(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
+		const char* name, const char* desc, const char* objtype, shared_ptr<IfcObjectPlacement> objplace, int elevation) {
+		shared_ptr<IfcBuildingStorey> res = make_shared<IfcBuildingStorey>();
+		res->m_GlobalId = globalID;
+			//res->m_GlobalId = make_shared<IfcGloballyUniqueId>(tmp1);
+		res->m_OwnerHistory = owner;
+		if (!name)
+			;
+			//res->m_Name = make_shared<IfcLabel>(tmp2);
+		if (!desc)
+			;
+			//res->m_Description = make_shared<IfcText>(tmp3);
+		if (!objtype)
+			;
+			//res->m_ObjectType = make_shared<IfcLabel>(tmp4);
+		res->m_ObjectPlacement = objplace;
+		DB2Ifc::vec_new_entitys.push_back(res);
+
+		shared_ptr<IfcRelAggregates> rel_aggregates_building_buildingstorey(new IfcRelAggregates());
+		rel_aggregates_building_buildingstorey->m_RelatingObject = DB2Ifc::Buildings[1];
+		rel_aggregates_building_buildingstorey->m_RelatedObjects.push_back(res);
+		DB2Ifc::vec_new_entitys.push_back(rel_aggregates_building_buildingstorey);
+		return res;
+	}

@@ -56,6 +56,9 @@
 #include"ifcpp\IFC4\include\IfcLogical.h"
 #include"ifcpp\IFC4\include\IfcIdentifier.h"
 #include"ifcpp\IFC4\include\IfcLabel.h"
+#include"ifcpp\IFC4\include\IfcBuildingStorey.h"
+#include"ifcpp\IFC4\include\IfcBuilding.h"
+#include"ifcpp\IFC4\include\IfcSite.h"
 //#include"ifcpp\IFC4\include\IfcShapeRepresentationItem.h"
 
 int GenIfcPoint_callback(void* data, int argc, char** argv, char** azColName);
@@ -82,6 +85,8 @@ public:
 	static std::unordered_map<int, std::shared_ptr<IfcMappedItem>>MappedItems;
 	static std::unordered_map<int, std::shared_ptr<IfcReinforcingBar>>ReinforcingBars;
 	static std::unordered_map<int, std::shared_ptr<IfcLocalPlacement>>LocalPlacements;
+	static std::unordered_map<int, std::shared_ptr<IfcBuilding>>Buildings;
+	static std::unordered_map<int, std::shared_ptr<IfcBuildingStorey>>BuildingStorey;
 	static DB2Ifc* ins;
 	static std::vector<shared_ptr<BuildingEntity>>vec_new_entitys;
 	static DB2Ifc* Instance() {
@@ -102,6 +107,9 @@ public:
 	static void GenReinforcingBarFromDB();
 	static void GenAllFromDB();
 	static void GenLocalPlacementFromDB();
+	static void GenBuildingFromDB();
+	static void GenBuildingStoreyFromDB();
+	static shared_ptr<IfcSite> site;
 private:
 	DB2Ifc();
 	~DB2Ifc() {};

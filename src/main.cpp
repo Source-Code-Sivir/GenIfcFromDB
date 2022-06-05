@@ -151,7 +151,7 @@ int main() {
 	//std::vector<shared_ptr<BuildingEntity>> vv;
 	//vv.push_back(DB2Ifc::points[1]);
 	ExportIfc exportEn;
-	exportEn.initIfcModel(DB2Ifc::ReinforcingBars[1], DB2Ifc::vec_new_entitys);
+	exportEn.initIfcModel( DB2Ifc::vec_new_entitys);
 	exportEn.exportifc();
 	return 0;
 }

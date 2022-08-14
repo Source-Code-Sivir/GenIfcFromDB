@@ -3,6 +3,12 @@
 #include"Genifc.h"
 #include<sstream>
 #include "ifcpp/model/BuildingGuid.h"
+#include"ifcpp\IFC4\include\IfcColourRgb.h"
+#include"ifcpp\IFC4\include\IfcSurfaceStyleRendering.h"
+#include"ifcpp\IFC4\include\IfcSurfaceStyle.h"
+#include"ifcpp\IFC4\include\IfcPresentationStyleAssignment.h"
+#include"ifcpp\IFC4\include\IfcSpecularExponent.h"
+#include<string>
 
 using std::stoi;
 using std::stod;
@@ -25,7 +31,17 @@ std::unordered_map<int, std::shared_ptr<IfcLocalPlacement>>DB2Ifc::LocalPlacemen
 std::unordered_map<int, std::shared_ptr<IfcMappedItem>>DB2Ifc::MappedItems;
 std::unordered_map<int, std::shared_ptr<IfcBuildingStorey>> DB2Ifc::BuildingStorey;
 std::unordered_map<int, std::shared_ptr<IfcBuilding>>DB2Ifc::Buildings;
+std::unordered_map<int, std::shared_ptr<IfcExtrudedAreaSolid>> DB2Ifc::ExtrudedAreaSolids;
+std::unordered_map<int, std::shared_ptr<IfcBeam>> DB2Ifc::beams;
+std::unordered_map<int, std::shared_ptr<IfcRelContainedInSpatialStructure>> DB2Ifc::storeyComponents;
+//std::unordered_map<int, std::shared_ptr<IfcElementAssembly>> DB2Ifc::BeamBarAssembly;
+unordered_map<int, shared_ptr<IfcRelAggregates>> DB2Ifc::BeamBarAssembly;
 
+shared_ptr<IfcRelAggregates> DB2Ifc::buildingAggregates = nullptr;
+shared_ptr<IfcPresentationStyleAssignment> DB2Ifc::mainBarColor = nullptr;
+shared_ptr<IfcPresentationStyleAssignment> DB2Ifc::tiedBarColor = nullptr;
+shared_ptr<IfcPresentationStyleAssignment> DB2Ifc::shearBarColor = nullptr;
+shared_ptr<IfcPresentationStyleAssignment> DB2Ifc::waistBarColor = nullptr;
 std::vector<shared_ptr<BuildingEntity>> DB2Ifc::vec_new_entitys;
 
 shared_ptr<IfcSite>DB2Ifc::site = nullptr;
@@ -128,7 +144,7 @@ int GenIfcCompositeCurve_callback(void* data, int argc, char** argv, char** azCo
 }
 int GenIfcSweptDiskSolid_callback(void* data, int argc, char** argv, char** azColName) {
 	int id = stoi(argv[0]), directid = stoi(argv[1]);
-	double radius = stod(argv[2]), innerradius = stod(argv[3]), begin = stod(argv[4]), end = stod(argv[5]);
+	double radius = stod(argv[2])/2, innerradius = stod(argv[3]), begin = stod(argv[4]), end = stod(argv[5]);
 	bool inner = true, b = true, e = true;
 	if (innerradius < 0) {
 		inner = false;
@@ -138,10 +154,125 @@ int GenIfcSweptDiskSolid_callback(void* data, int argc, char** argv, char** azCo
 	}
 	if (end < 0) {
 		e = false;
-	}
-	//shared_ptr<IfcCurve> tmp = DB2Ifc::CompositeCurves[directid];
+	} 
+	int bartype = stoi(argv[6]);
 	DB2Ifc::SweptDIskSolids[id] = GenIfc::GenIfcSweptDiskSolid(DB2Ifc::CompositeCurves[directid], radius, innerradius, begin, end);
-	//DB2Ifc::vec_new_entitys.push_back(DB2Ifc::SweptDIskSolids[id]);
+	if (DB2Ifc::mainBarColor == nullptr) {
+		shared_ptr<IfcColourRgb> colorrgb = make_shared<IfcColourRgb>();
+		DB2Ifc::vec_new_entitys.push_back(colorrgb);
+		colorrgb->m_Red = make_shared< IfcNormalisedRatioMeasure>(1);
+		colorrgb->m_Green = make_shared< IfcNormalisedRatioMeasure>(0);
+		colorrgb->m_Blue = make_shared< IfcNormalisedRatioMeasure>(0);
+
+		shared_ptr<IfcSurfaceStyleRendering> rendering = make_shared<IfcSurfaceStyleRendering>();
+		DB2Ifc::vec_new_entitys.push_back(rendering);
+		rendering->m_SurfaceColour = colorrgb;
+		rendering->m_ReflectanceMethod = make_shared<IfcReflectanceMethodEnum>(IfcReflectanceMethodEnum::ENUM_NOTDEFINED);
+		rendering->m_SpecularColour = make_shared<IfcNormalisedRatioMeasure>(0.00390625);
+		rendering->m_SpecularHighlight = make_shared<IfcSpecularExponent>(10);
+		rendering->m_Transparency = make_shared<IfcNormalisedRatioMeasure>(0);
+
+		shared_ptr<IfcSurfaceStyle> surfacestyle = make_shared<IfcSurfaceStyle>();
+		DB2Ifc::vec_new_entitys.push_back(surfacestyle);
+		surfacestyle->m_Side = make_shared<IfcSurfaceSide>(IfcSurfaceSide::ENUM_POSITIVE);
+		surfacestyle->m_Styles.push_back(rendering);
+
+		shared_ptr<IfcPresentationStyleAssignment>layerass = make_shared<IfcPresentationStyleAssignment>();
+		DB2Ifc::vec_new_entitys.push_back(layerass);
+		layerass->m_Styles.push_back(surfacestyle);
+
+		DB2Ifc::mainBarColor = layerass;
+	}
+	if (DB2Ifc::tiedBarColor == nullptr) {
+		shared_ptr<IfcColourRgb> colorrgb = make_shared<IfcColourRgb>();
+		DB2Ifc::vec_new_entitys.push_back(colorrgb);
+		colorrgb->m_Red = make_shared< IfcNormalisedRatioMeasure>(0);
+		colorrgb->m_Green = make_shared< IfcNormalisedRatioMeasure>(1);
+		colorrgb->m_Blue = make_shared< IfcNormalisedRatioMeasure>(0);
+
+		shared_ptr<IfcSurfaceStyleRendering> rendering = make_shared<IfcSurfaceStyleRendering>();
+		DB2Ifc::vec_new_entitys.push_back(rendering);
+		rendering->m_SurfaceColour = colorrgb;
+		rendering->m_ReflectanceMethod = make_shared<IfcReflectanceMethodEnum>(IfcReflectanceMethodEnum::ENUM_NOTDEFINED);
+		rendering->m_SpecularColour = make_shared<IfcNormalisedRatioMeasure>(0.00390625);
+		rendering->m_SpecularHighlight = make_shared<IfcSpecularExponent>(10);
+		rendering->m_Transparency = make_shared<IfcNormalisedRatioMeasure>(0);
+
+		shared_ptr<IfcSurfaceStyle> surfacestyle = make_shared<IfcSurfaceStyle>();
+		DB2Ifc::vec_new_entitys.push_back(surfacestyle);
+		surfacestyle->m_Side = make_shared<IfcSurfaceSide>(IfcSurfaceSide::ENUM_POSITIVE);
+		surfacestyle->m_Styles.push_back(rendering);
+
+		shared_ptr<IfcPresentationStyleAssignment>layerass = make_shared<IfcPresentationStyleAssignment>();
+		DB2Ifc::vec_new_entitys.push_back(layerass);
+		layerass->m_Styles.push_back(surfacestyle);
+
+		DB2Ifc::tiedBarColor = layerass;
+	}
+	if (DB2Ifc::waistBarColor == nullptr) {
+		shared_ptr<IfcColourRgb> colorrgb = make_shared<IfcColourRgb>();
+		DB2Ifc::vec_new_entitys.push_back(colorrgb);
+		colorrgb->m_Red = make_shared< IfcNormalisedRatioMeasure>(0);
+		colorrgb->m_Green = make_shared< IfcNormalisedRatioMeasure>(0.6);
+		colorrgb->m_Blue = make_shared< IfcNormalisedRatioMeasure>(0.8);
+
+		shared_ptr<IfcSurfaceStyleRendering> rendering = make_shared<IfcSurfaceStyleRendering>();
+		DB2Ifc::vec_new_entitys.push_back(rendering);
+		rendering->m_SurfaceColour = colorrgb;
+		rendering->m_ReflectanceMethod = make_shared<IfcReflectanceMethodEnum>(IfcReflectanceMethodEnum::ENUM_NOTDEFINED);
+		rendering->m_SpecularColour = make_shared<IfcNormalisedRatioMeasure>(0.00390625);
+		rendering->m_SpecularHighlight = make_shared<IfcSpecularExponent>(10);
+		rendering->m_Transparency = make_shared<IfcNormalisedRatioMeasure>(0);
+
+		shared_ptr<IfcSurfaceStyle> surfacestyle = make_shared<IfcSurfaceStyle>();
+		DB2Ifc::vec_new_entitys.push_back(surfacestyle);
+		surfacestyle->m_Side = make_shared<IfcSurfaceSide>(IfcSurfaceSide::ENUM_POSITIVE);
+		surfacestyle->m_Styles.push_back(rendering);
+
+		shared_ptr<IfcPresentationStyleAssignment>layerass = make_shared<IfcPresentationStyleAssignment>();
+		DB2Ifc::vec_new_entitys.push_back(layerass);
+		layerass->m_Styles.push_back(surfacestyle);
+
+		DB2Ifc::waistBarColor = layerass;
+	}
+	if (DB2Ifc::shearBarColor == nullptr) {
+		shared_ptr<IfcColourRgb> colorrgb = make_shared<IfcColourRgb>();
+		DB2Ifc::vec_new_entitys.push_back(colorrgb);
+		colorrgb->m_Red = make_shared< IfcNormalisedRatioMeasure>(1);
+		colorrgb->m_Green = make_shared< IfcNormalisedRatioMeasure>(0.6);
+		colorrgb->m_Blue = make_shared< IfcNormalisedRatioMeasure>(0);
+
+		shared_ptr<IfcSurfaceStyleRendering> rendering = make_shared<IfcSurfaceStyleRendering>();
+		DB2Ifc::vec_new_entitys.push_back(rendering);
+		rendering->m_SurfaceColour = colorrgb;
+		rendering->m_ReflectanceMethod = make_shared<IfcReflectanceMethodEnum>(IfcReflectanceMethodEnum::ENUM_NOTDEFINED);
+		rendering->m_SpecularColour = make_shared<IfcNormalisedRatioMeasure>(0.00390625);
+		rendering->m_SpecularHighlight = make_shared<IfcSpecularExponent>(10);
+		rendering->m_Transparency = make_shared<IfcNormalisedRatioMeasure>(0);
+
+		shared_ptr<IfcSurfaceStyle> surfacestyle = make_shared<IfcSurfaceStyle>();
+		DB2Ifc::vec_new_entitys.push_back(surfacestyle);
+		surfacestyle->m_Side = make_shared<IfcSurfaceSide>(IfcSurfaceSide::ENUM_POSITIVE);
+		surfacestyle->m_Styles.push_back(rendering);
+
+		shared_ptr<IfcPresentationStyleAssignment>layerass = make_shared<IfcPresentationStyleAssignment>();
+		DB2Ifc::vec_new_entitys.push_back(layerass);
+		layerass->m_Styles.push_back(surfacestyle);
+
+		DB2Ifc::shearBarColor = layerass;
+	}
+	shared_ptr<IfcStyledItem>style = make_shared<IfcStyledItem>();
+	DB2Ifc::vec_new_entitys.push_back(style);
+	style->m_Item = DB2Ifc::SweptDIskSolids[id];
+	//shared_ptr<IfcPresentationStyleAssignment>tmp = DB2Ifc::mainBarColor;
+	if(bartype==1)
+		style->m_Styles.push_back(DB2Ifc::mainBarColor);
+	else if(bartype==2)
+		style->m_Styles.push_back(DB2Ifc::tiedBarColor);
+	else if (bartype == 3) 
+		style->m_Styles.push_back(DB2Ifc::shearBarColor);
+	else if(bartype==4)
+		style->m_Styles.push_back(DB2Ifc::waistBarColor);
 	return 0;
 }
 int GenIfcMappedItem_callback(void* data, int argc, char** argv, char** azColName) {
@@ -162,7 +293,7 @@ int GenIfcMappedItem_callback(void* data, int argc, char** argv, char** azColNam
 			std::vector<shared_ptr<IfcRepresentationItem>> items;
 			items.push_back(DB2Ifc::SweptDIskSolids[i]);
 			shared_ptr<IfcRepresentationMap> mapsource = GenIfc::GenIfcRepresentationMap(DB2Ifc::placements[1], GenIfc::GenIfcShapeRepresentation(nullptr, "Body", "SweptDiskSolid", items));
-			res = GenIfc::GenIfcMappedItem(mapsource, GenIfc::GenIfcCartesianTransformationOperator3D(NULL, NULL, DB2Ifc::points[pointid], nullptr,nullptr));
+			res = GenIfc::GenIfcMappedItem(mapsource, GenIfc::GenIfcCartesianTransformationOperator3D(NULL , NULL, DB2Ifc::points[pointid], nullptr, NULL));
 		}
 	}
 	default:
@@ -176,15 +307,14 @@ int GenIfcReinforcingBar_callback(void* data, int argc, char** argv, char** azCo
 	int id = stoi(argv[0]);
 	int ownerid = stoi(argv[1]);
 	const char* name(argv[2]);
-	const char* description(argv[3]);
-	const char* objecttype(argv[4]);
-	int placementid = stoi(argv[5]);
-	string mappids(argv[6]);
-	const char* stellgrade(argv[7]);
-	int parentStoreyID = stoi(argv[8]);
+	int placementid = stoi(argv[3]);
+	string mappids(argv[4]);
+	const char* stellgrade(argv[5]);
+	int parentStoreyID = stoi(argv[6]);
 	vector<int> mappedids;
 	stringstream ss(mappids);
 	string tmp;
+	//DB2Ifc::BeamBarAssembly[id] = make_shared<IfcRelAggregates>();
 	while (ss>>tmp)
 	{
 		mappedids.push_back(stoi(tmp));
@@ -193,13 +323,56 @@ int GenIfcReinforcingBar_callback(void* data, int argc, char** argv, char** azCo
 	for (auto i : mappedids) {
 		items.push_back(DB2Ifc::MappedItems[i]);
 	}
-	shared_ptr<IfcRepresentation> barRepresentation = GenIfc::GenIfcShapeRepresentation(nullptr, nullptr, nullptr, items);
+	shared_ptr<IfcRepresentation> barRepresentation = GenIfc::GenIfcShapeRepresentation(nullptr, "Body", "MappedRepresentation", items);
 	std::vector<shared_ptr<IfcRepresentation>> vecrep;
 	vecrep.push_back(barRepresentation);
-	shared_ptr<IfcProductDefinitionShape> barShape = GenIfc::GenIfcProductDefinitionShape(nullptr, NULL, vecrep);
-	DB2Ifc::ReinforcingBars[id] = GenIfc::GenIfcReinforcingBar(make_shared<IfcGloballyUniqueId>(createBase64Uuid_wstr().data()),nullptr,nullptr,nullptr,nullptr,DB2Ifc::LocalPlacements[placementid],
-		barShape,nullptr,NULL,25,-1,-1,IfcReinforcingBarTypeEnum::ENUM_MAIN,IfcReinforcingBarSurfaceEnum::ENUM_PLAIN,parentStoreyID);
+	shared_ptr<IfcProductDefinitionShape> barShape = GenIfc::GenIfcProductDefinitionShape("", "", vecrep);
+	DB2Ifc::ReinforcingBars[id] = GenIfc::GenIfcReinforcingBar(make_shared<IfcGloballyUniqueId>(createBase64Uuid_wstr().data()),nullptr,"AA", DB2Ifc::LocalPlacements[placementid],
+		barShape,"C30", IfcReinforcingBarTypeEnum::ENUM_MAIN, IfcReinforcingBarSurfaceEnum::ENUM_PLAIN, parentStoreyID);
 	//DB2Ifc::vec_new_entitys.push_back(DB2Ifc::ReinforcingBars[id]);
+	DB2Ifc::BeamBarAssembly[parentStoreyID]->m_RelatedObjects.push_back(DB2Ifc::ReinforcingBars[id]);
+
+	return 0;
+}
+int GenIfcExtrudedAreaSolid_callback(void* data, int argc, char** argv, char** azColName) {
+	int id = stoi(argv[0]);
+	int sectionType = stoi(argv[1]);
+	string parameter(argv[2]);
+	int directionID = stoi(argv[3]);
+	int depth = stoi(argv[4]);
+	//printf("%d", depth);
+	DB2Ifc::ExtrudedAreaSolids[id] = GenIfc::GenIfcExtrudedAreaSolid(GenIfc::GenIfcProfileDef(sectionType, parameter), DB2Ifc::directions[directionID], depth);
+	return 0;
+}
+int GenIfcBeam_callback(void* data, int argc, char** argv, char** azColName) {
+	int id = stoi(argv[0]);
+	int ownerid = stoi(argv[1]);
+	int localplacementID = stoi(argv[3]);
+	int representationId = stoi(argv[4]);//直接去sweptdisksolid里面找
+	int storeyID = stoi(argv[5]);
+
+	std::vector<shared_ptr<IfcRepresentationItem>> items;
+	items.push_back(DB2Ifc::ExtrudedAreaSolids[representationId]);
+	shared_ptr<IfcRepresentation> beamRepresentation = GenIfc::GenIfcShapeRepresentation(nullptr, "Body", "SweptSolid", items);
+	std::vector<shared_ptr<IfcRepresentation>> vecrep;
+	vecrep.push_back(beamRepresentation);
+	shared_ptr<IfcProductDefinitionShape> beamShape = GenIfc::GenIfcProductDefinitionShape(nullptr, NULL, vecrep);
+	DB2Ifc::beams[id] = GenIfc::GeIfcBeam(NULL, "bbb",DB2Ifc::LocalPlacements[localplacementID], beamShape, IfcBeamTypeEnum::ENUM_BEAM, storeyID);
+	
+	/*shared_ptr<IfcElementAssembly> elementAssembly = make_shared<IfcElementAssembly>();
+	elementAssembly->m_ObjectPlacement = DB2Ifc::LocalPlacements[localplacementID];
+	DB2Ifc::vec_new_entitys.push_back(elementAssembly);*/
+
+	shared_ptr<IfcRelAggregates> relAgg = make_shared<IfcRelAggregates>();
+	shared_ptr<IfcElementAssembly> tmpass = make_shared<IfcElementAssembly>();
+	relAgg->m_RelatingObject = tmpass;
+	DB2Ifc::BeamBarAssembly[id] = relAgg;
+	DB2Ifc::vec_new_entitys.push_back(tmpass);
+	DB2Ifc::vec_new_entitys.push_back(relAgg);
+
+	DB2Ifc::storeyComponents[storeyID]->m_RelatedElements.push_back(tmpass);
+	relAgg->m_RelatedObjects.push_back(DB2Ifc::beams[id]);
+
 	return 0;
 }
 int GenIfcLocalPlacement_callback(void* data, int argc, char** argv, char** azColName) {
@@ -221,7 +394,25 @@ int GenIfcBuilding_callback(void* data, int argc, char** argv, char** azColName)
 }
 int GenIfcBuildingStorey_callback(void* data, int argc, char** argv, char** azColName) {
 	int id = stoi(argv[0]), localPlacementID = stoi(argv[5]), h = stoi(argv[6]);
+	//string 
+	//wchar_t tmp[10] = "ssss";
 	DB2Ifc::BuildingStorey[id] = GenIfc::GenIfcBuildingStorey(make_shared<IfcGloballyUniqueId>(createBase64Uuid_wstr().data()), nullptr, nullptr, nullptr, nullptr,DB2Ifc::LocalPlacements[localPlacementID],h );
+	DB2Ifc::storeyComponents[id] = make_shared<IfcRelContainedInSpatialStructure>();
+	DB2Ifc::storeyComponents[id]->m_RelatingStructure = DB2Ifc::BuildingStorey[id];
+	DB2Ifc::vec_new_entitys.push_back(DB2Ifc::storeyComponents[id]);
+
+	/*shared_ptr<IfcElementAssembly> elementAssembly = make_shared<IfcElementAssembly>();
+	elementAssembly->m_ObjectPlacement = DB2Ifc::LocalPlacements[localPlacementID];
+	DB2Ifc::vec_new_entitys.push_back(elementAssembly);*/
+
+	/*shared_ptr<IfcRelAggregates> relAgg = make_shared<IfcRelAggregates>();
+	relAgg->m_RelatingObject = elementAssembly;
+	DB2Ifc::BeamBarAssembly[id] = relAgg;
+	DB2Ifc::vec_new_entitys.push_back(relAgg);
+	
+	DB2Ifc::storeyComponents[id]->m_RelatedElements.push_back(elementAssembly);*/
+
+
 	return 0;
 }
 void DB2Ifc::GenPointsFromDB() {
@@ -289,6 +480,17 @@ void DB2Ifc::GenBuildingStoreyFromDB() {
 	printf("%s", "buildingstorey");
 	SqliteExecution::Instance()->SelectDb(command, GenIfcBuildingStorey_callback, 0);
 }
+
+void DB2Ifc::GenBeamFromDB() {
+	string command = "select * from IfcBeam;";
+	printf("%s ", "ifcbeam ");
+	SqliteExecution::Instance()->SelectDb(command, GenIfcBeam_callback, 0);
+}
+void DB2Ifc::GenExtrudedAreaSolidFromDB() {
+	string command = "select * from IfcExtrudedAreaSolid;";
+	printf("areadisksolid ");
+	SqliteExecution::Instance()->SelectDb(command, GenIfcExtrudedAreaSolid_callback, 0);
+}
 void DB2Ifc::GenAllFromDB() {
 	GenPointsFromDB();
 	GenDirectionsFromDB();
@@ -298,6 +500,8 @@ void DB2Ifc::GenAllFromDB() {
 	GenCirclesFromDB();
 	GenBuildingFromDB();
 	GenBuildingStoreyFromDB();
+	GenExtrudedAreaSolidFromDB();
+	GenBeamFromDB();
 	GenTrimmedCurveFromDB();
 	GenCompositeCurveFromDB();
 	GenSweptDiskSoldFromDB();

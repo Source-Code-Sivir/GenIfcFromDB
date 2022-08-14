@@ -1,7 +1,12 @@
 #include"Genifc.h"
 //#pragma comment(lib,"IfcPlusPlus.dll")
 #include"DB2Ifc.h"
-
+#include "ifcpp/model/BuildingGuid.h"
+#include"ifcpp\IFC4\include\IfcProfileDef.h"
+#include"ifcpp\IFC4\include\IfcRectangleProfileDef.h"
+#include"ifcpp\IFC4\include\IfcPresentationStyleAssignment.h"
+#include<string>
+#include<corecrt_wstring.h>
 
 	std::shared_ptr<IfcCompositeCurveSegment> GenIfc::GenIfcCompositeCurveSegment(shared_ptr<IfcTransitionCode>m_Transition, bool m_SameSense, shared_ptr<IfcCurve> m_ParentCurve) {
 		shared_ptr<IfcCompositeCurveSegment> res = make_shared<IfcCompositeCurveSegment>();
@@ -104,20 +109,20 @@
 		if(end>=0)
 			res->m_EndParam = make_shared<IfcParameterValue>(end);
 		DB2Ifc::vec_new_entitys.push_back(res);
+
 		return res;
 	}
 	std::shared_ptr<IfcShapeRepresentation> GenIfc::GenIfcShapeRepresentation(shared_ptr<IfcRepresentationContext> context, const char *m_RepresentationIdentifier, const char *
 		m_RepresentationType, std::vector<shared_ptr<IfcRepresentationItem>>&m_Items) {
-		wchar_t tmp1[100],tmp2[100];
-		swprintf(tmp1, 100, L"%ws", m_RepresentationIdentifier);
-		swprintf(tmp2, 100, L"%ws", m_RepresentationType);
-
+		
+		std::string tmp1(m_RepresentationIdentifier), tmp2(m_RepresentationType);
+		
 		shared_ptr<IfcShapeRepresentation> res = make_shared<IfcShapeRepresentation>();
 		res->m_ContextOfItems = context;
-		if(!m_RepresentationIdentifier)
-			res->m_RepresentationType =make_shared<IfcLabel>( tmp1);
-		if(!m_RepresentationType)
-			res->m_RepresentationIdentifier =make_shared<IfcLabel>(tmp2);
+		if (m_RepresentationIdentifier)
+			res->m_RepresentationType =make_shared<IfcLabel>(std::wstring(tmp2.begin(),tmp2.end()));
+		if (m_RepresentationType)
+			res->m_RepresentationIdentifier =make_shared<IfcLabel>(std::wstring(tmp1.begin(), tmp1.end()));
 		res->m_Items = m_Items;
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
@@ -174,10 +179,10 @@
 		swprintf(tmp2, 100, L"%ws", desc);
 
 		shared_ptr<IfcProductDefinitionShape> res = make_shared<IfcProductDefinitionShape>();
-		if(!name)
+		/*if(!name)
 			res->m_Name =make_shared<IfcLabel>(tmp1);
 		if(!desc)
-			res->m_Description =make_shared<IfcText>(tmp2);
+			res->m_Description =make_shared<IfcText>(tmp2);*/
 		res->m_Representations = repres;
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
@@ -196,52 +201,7 @@
 		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}
-	std::shared_ptr<IfcReinforcingBar> GenIfc::GenIfcReinforcingBar(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
-		const char* name, const char* desc, const char* objtype, shared_ptr<IfcObjectPlacement> objplace,
-		shared_ptr<IfcProductRepresentation> repre, const char* tag, const char* steel,
-		double diameter, double area, double len,
-		IfcReinforcingBarTypeEnum predefinedtype, IfcReinforcingBarSurfaceEnum surface,int parentStoreyID) {
-		wchar_t tmp1[100], tmp2[100],tmp3[100],tmp4[100],tmp5[100],tmp6[100];
-		//swprintf(tmp1, 100, L"%ws", id);
-		swprintf(tmp2, 100, L"%ws", name);
-		swprintf(tmp3, 100, L"%ws", desc);
-		swprintf(tmp4, 100, L"%ws", objtype);
-		swprintf(tmp5, 100, L"%ws", tag);
-		swprintf(tmp6, 100, L"%ws", steel);
-
-		shared_ptr<IfcReinforcingBar> res = make_shared<IfcReinforcingBar>();
-		if(!globalID)
-			res->m_GlobalId = globalID;
-		res->m_OwnerHistory = owner;
-		if (!name)
-			res->m_Name = make_shared<IfcLabel>(tmp2);
-		if(!desc)
-			res->m_Description = make_shared<IfcText>(tmp3);
-		if(!objtype)
-			res->m_ObjectType =make_shared<IfcLabel>(tmp4);
-		res->m_ObjectPlacement = objplace;
-		res->m_Representation = repre;
-		if(!tag)
-			res->m_Tag = make_shared<IfcIdentifier>(tmp5);
-		if(!steel)
-			res->m_SteelGrade = make_shared<IfcLabel>(tmp6);
-		res->m_NominalDiameter =make_shared<IfcPositiveLengthMeasure>(diameter);
-		if(area>1)
-			res->m_CrossSectionArea = make_shared<IfcAreaMeasure>(area);
-		if(len>1)
-		res->m_BarLength =make_shared<IfcPositiveLengthMeasure>(len);
-
-		res->m_PredefinedType = make_shared<IfcReinforcingBarTypeEnum>(predefinedtype);
-		res->m_BarSurface = make_shared<IfcReinforcingBarSurfaceEnum>(surface);
-		DB2Ifc::vec_new_entitys.push_back(res);
-
-		shared_ptr<IfcRelContainedInSpatialStructure> rel_contained_buildingstorey_wall(new IfcRelContainedInSpatialStructure());
-		rel_contained_buildingstorey_wall->m_RelatingStructure = DB2Ifc::BuildingStorey[parentStoreyID];
-		rel_contained_buildingstorey_wall->m_RelatedElements.push_back(res);
-		DB2Ifc::vec_new_entitys.push_back(rel_contained_buildingstorey_wall);
-
-		return res;
-	}
+	
 
 	std::shared_ptr<IfcBuilding> GenIfc::GenIfcBuilding(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
 		const char* name, const char* desc, const char* objtype, shared_ptr<IfcObjectPlacement> objplace) {
@@ -252,10 +212,19 @@
 
 		shared_ptr<IfcBuilding> res = make_shared<IfcBuilding>();
 		res->m_GlobalId = globalID;
+		
 		shared_ptr<IfcRelAggregates> rel_aggregates_site_building(new IfcRelAggregates());
 		rel_aggregates_site_building->m_RelatingObject = DB2Ifc::site;
 		rel_aggregates_site_building->m_RelatedObjects.push_back(res);
-		DB2Ifc::vec_new_entitys.push_back(rel_aggregates_site_building);
+		DB2Ifc::vec_new_entitys.push_back(rel_aggregates_site_building);//将site和building绑定到一起
+		
+
+		if (DB2Ifc::buildingAggregates == nullptr) {
+			shared_ptr<IfcRelAggregates> buildingAgg = make_shared<IfcRelAggregates>();
+			DB2Ifc::buildingAggregates = buildingAgg;
+			DB2Ifc::vec_new_entitys.push_back(buildingAgg);
+			buildingAgg->m_RelatingObject = res;
+		}
 
 		if (!globalID)
 			//res->m_GlobalId = make_shared<IfcGloballyUniqueId>(tmp1);
@@ -289,9 +258,90 @@
 		res->m_ObjectPlacement = objplace;
 		DB2Ifc::vec_new_entitys.push_back(res);
 
-		shared_ptr<IfcRelAggregates> rel_aggregates_building_buildingstorey(new IfcRelAggregates());
-		rel_aggregates_building_buildingstorey->m_RelatingObject = DB2Ifc::Buildings[1];
-		rel_aggregates_building_buildingstorey->m_RelatedObjects.push_back(res);
-		DB2Ifc::vec_new_entitys.push_back(rel_aggregates_building_buildingstorey);
+		DB2Ifc::buildingAggregates->m_RelatedObjects.push_back(res);
+		return res;
+	}
+
+	std::shared_ptr<IfcReinforcingBar> GenIfc::GenIfcReinforcingBar(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
+		const char* name, shared_ptr<IfcObjectPlacement> objplace,
+		shared_ptr<IfcProductRepresentation> repre, const char* steel,
+		IfcReinforcingBarTypeEnum predefinedtype, IfcReinforcingBarSurfaceEnum surface, int parentStoreyID) {
+		wchar_t tmp1[100], tmp2[100], tmp3[100], tmp4[100], tmp5[100], tmp6[100];
+		//swprintf(tmp1, 100, L"%ws", id);
+		swprintf(tmp2, 100, L"%ws", name);
+		swprintf(tmp6, 100, L"%ws", steel);
+
+		shared_ptr<IfcReinforcingBar> res = make_shared<IfcReinforcingBar>();
+		if (!globalID)
+			res->m_GlobalId = globalID;
+		res->m_OwnerHistory = owner;
+		/*if (!name)
+			res->m_Name = make_shared<IfcLabel>(tmp2);*/
+		
+		res->m_ObjectPlacement = objplace;
+		res->m_Representation = repre;
+		
+		/*if (!steel)
+			res->m_SteelGrade = make_shared<IfcLabel>(tmp6);*/
+		
+		
+
+		res->m_PredefinedType = make_shared<IfcReinforcingBarTypeEnum>(predefinedtype);
+		res->m_BarSurface = make_shared<IfcReinforcingBarSurfaceEnum>(surface);
+		DB2Ifc::vec_new_entitys.push_back(res);
+		
+		DB2Ifc::BeamBarAssembly[parentStoreyID]->m_RelatedObjects.push_back(res);
+		return res;
+	}
+
+	std::shared_ptr<IfcBeam> GenIfc::GeIfcBeam(shared_ptr<IfcOwnerHistory> owner,
+		const char* name, shared_ptr<IfcObjectPlacement> objplace, shared_ptr<IfcProductRepresentation> representation, IfcBeamTypeEnum e,int parentStoreyID) {
+		shared_ptr<IfcBeam>res = make_shared<IfcBeam>();
+		std::string tmp = "TEST";
+		std::wstring my(tmp.begin(), tmp.end());
+		res->m_GlobalId = make_shared<IfcGloballyUniqueId>(createBase64Uuid_wstr().data());
+		res->m_Name = make_shared<IfcLabel>(my.data());
+		res->m_Description = make_shared<IfcText>(my.data());
+		res->m_OwnerHistory = owner;
+		res->m_ObjectPlacement = objplace;
+		res->m_Representation = representation;
+		DB2Ifc::vec_new_entitys.push_back(res);
+
+		
+		//DB2Ifc::BeamBarAssembly[parentStoreyID]->m_RelatedObjects.push_back(res);
+
+		return res;
+	}
+
+	std::shared_ptr<IfcExtrudedAreaSolid> GenIfc::GenIfcExtrudedAreaSolid(shared_ptr<IfcProfileDef> profile, shared_ptr<IfcDirection> direction, int depth) {
+		shared_ptr<IfcExtrudedAreaSolid> res = make_shared<IfcExtrudedAreaSolid>();
+		res->m_SweptArea = profile;
+		res->m_ExtrudedDirection = direction;
+		res->m_Depth = make_shared<IfcPositiveLengthMeasure>(depth);
+		res->m_Position = DB2Ifc::placements[1];
+		DB2Ifc::vec_new_entitys.push_back(res);
+		
+		return res;
+	}
+	std::shared_ptr<IfcProfileDef> GenIfc::GenIfcProfileDef(int type, std::string parameter) {
+		shared_ptr<IfcProfileDef> res;
+		switch (type)
+		{
+
+		case 1: {
+			shared_ptr<IfcRectangleProfileDef> res_ = make_shared<IfcRectangleProfileDef>();
+			res_->m_ProfileType = make_shared<IfcProfileTypeEnum>(IfcProfileTypeEnum::ENUM_AREA);
+			res_->m_XDim =make_shared<IfcPositiveLengthMeasure>(std::stoi(parameter));
+			int pos = 0;
+			while (parameter[pos] != ' ') {
+				pos++;
+			}
+			res_->m_YDim = make_shared<IfcPositiveLengthMeasure>(std::stoi(parameter.substr(pos + 1)));
+			res = res_;
+		}
+		default:
+			break;
+		}
+		DB2Ifc::vec_new_entitys.push_back(res);
 		return res;
 	}

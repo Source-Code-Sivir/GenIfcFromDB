@@ -172,7 +172,7 @@ void ExportIfc::initIfcModel(std::vector<shared_ptr<BuildingEntity>>& vec_new_en
 	geom_context->m_ContextType = shared_ptr<IfcLabel>(new IfcLabel(L"Model"));
 	geom_context->m_CoordinateSpaceDimension = shared_ptr<IfcDimensionCount>(new IfcDimensionCount(3));
 	geom_context->m_Precision = shared_ptr<IfcReal>(new IfcReal(1.000E-5));
-	geom_context->m_WorldCoordinateSystem = DB2Ifc::placements[0];
+	geom_context->m_WorldCoordinateSystem = DB2Ifc::placements[1];
 	vec_new_entities.push_back(geom_context);
 
 	ifc_project->m_UnitsInContext = unit_assignment;

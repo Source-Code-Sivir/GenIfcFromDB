@@ -59,6 +59,14 @@
 #include"ifcpp\IFC4\include\IfcBuildingStorey.h"
 #include"ifcpp\IFC4\include\IfcBuilding.h"
 #include"ifcpp\IFC4\include\IfcSite.h"
+#include"ifcpp\IFC4\include\IfcExtrudedAreaSolid.h"
+#include"ifcpp\IFC4\include\IfcBeam.h"
+#include"ifcpp\IFC4\include\IfcRelContainedInSpatialStructure.h"
+#include"ifcpp\IFC4\include\IfcStyledItem.h"
+#include"ifcpp\IFC4\include\IfcPresentationStyleAssignment.h"
+#include"ifcpp\IFC4\include\IfcNormalisedRatioMeasure.h"
+#include"ifcpp\IFC4\include\IfcElementAssembly.h"
+
 //#include"ifcpp\IFC4\include\IfcShapeRepresentationItem.h"
 
 int GenIfcPoint_callback(void* data, int argc, char** argv, char** azColName);
@@ -72,6 +80,8 @@ int GenIfcSweptDiskSolid_callback(void* data, int argc, char** argv, char** azCo
 int GenIfcMappedItem_callback(void* data, int argc, char** argv, char** azColName);
 int GenIfcReinforcingBar_callback(void* data, int argc, char** argv, char** azColName);
 int GenIfcLocalPlacement_callback(void* data, int argc, char** argv, char** azColName);
+int GenIfcBeam_callback(void* data, int argc, char** argv, char** azColName);
+int GenIfcExtrudedAreaSolid_callback(void* data, int argc, char** argv, char** azColName);
 class DB2Ifc {
 public:
 	static std::unordered_map<int ,std::shared_ptr<IfcCartesianPoint>> points;
@@ -87,6 +97,17 @@ public:
 	static std::unordered_map<int, std::shared_ptr<IfcLocalPlacement>>LocalPlacements;
 	static std::unordered_map<int, std::shared_ptr<IfcBuilding>>Buildings;
 	static std::unordered_map<int, std::shared_ptr<IfcBuildingStorey>>BuildingStorey;
+	static std::unordered_map<int, std::shared_ptr<IfcExtrudedAreaSolid>> ExtrudedAreaSolids;
+	static std::unordered_map<int, std::shared_ptr<IfcBeam>> beams;
+
+	static std::unordered_map<int, std::shared_ptr<IfcRelContainedInSpatialStructure>> storeyComponents;//层所有的ifc实体 里面是IfcrealAgg
+
+
+	static std::unordered_map<int, std::shared_ptr<IfcRelAggregates>> BeamBarAssembly;
+
+	static shared_ptr<IfcRelAggregates> buildingAggregates;
+
+	//static std::unordered_map<int, std::shared_ptr<IfcProfileDef>> ProfileDefs;
 	static DB2Ifc* ins;
 	static std::vector<shared_ptr<BuildingEntity>>vec_new_entitys;
 	static DB2Ifc* Instance() {
@@ -109,7 +130,13 @@ public:
 	static void GenLocalPlacementFromDB();
 	static void GenBuildingFromDB();
 	static void GenBuildingStoreyFromDB();
+	static void GenBeamFromDB();
+	static void GenExtrudedAreaSolidFromDB();
 	static shared_ptr<IfcSite> site;
+	static shared_ptr<IfcPresentationStyleAssignment> mainBarColor;
+	static shared_ptr<IfcPresentationStyleAssignment> tiedBarColor;
+	static shared_ptr<IfcPresentationStyleAssignment> shearBarColor;
+	static shared_ptr<IfcPresentationStyleAssignment> waistBarColor;
 private:
 	DB2Ifc();
 	~DB2Ifc() {};

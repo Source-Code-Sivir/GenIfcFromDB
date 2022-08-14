@@ -3,6 +3,8 @@
 #define GENIFC_H
 #include<memory>
 #include<vector>
+#include<string>
+
 #include<unordered_map>
 #include"ifcpp\IFC4\include\IfcReinforcingBar.h"
 #include"ifcpp\IFC4\include\IfcCompositeCurve.h"
@@ -64,10 +66,13 @@
 #include"ifcpp\IFC4\include\IfcSite.h"
 #include"ifcpp\IFC4\include\IfcRelAggregates.h"
 #include"ifcpp\IFC4\include\IfcRelContainedInSpatialStructure.h"
-
+#include"ifcpp\IFC4\include\IfcBeam.h"
+#include"ifcpp\IFC4\include\IfcBeamTypeEnum.h"
+#include"ifcpp\IFC4\include\IfcExtrudedAreaSolid.h"
 
 class GenIfc {
 public:
+	static std::unordered_map<int, shared_ptr<IfcBuildingStorey>> storeys;//´æ´¢Â¥²ãÐÅÏ¢
 	static std::shared_ptr<IfcCartesianPoint> GenIfcCartesianPoint(std::vector<double>& data);
 
 	static std::shared_ptr<IfcDirection> GenIfcDirection(std::vector<double>& data);
@@ -114,9 +119,8 @@ public:
 		shared_ptr<IfcAxis2Placement> place);
 
 	static std::shared_ptr<IfcReinforcingBar> GenIfcReinforcingBar(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
-		const char* name, const char* desc, const char* objtype, shared_ptr<IfcObjectPlacement> objplace,
-		shared_ptr<IfcProductRepresentation> repre, const char* tag, const char* steel,
-		double diameter, double area, double len,
+		const char* name, shared_ptr<IfcObjectPlacement> objplace,
+		shared_ptr<IfcProductRepresentation> repre, const char* steel,
 		IfcReinforcingBarTypeEnum predefinedtype, IfcReinforcingBarSurfaceEnum surface, int parentStoreyID);
 
 	static std::shared_ptr<IfcCartesianTransformationOperator> GenIfcCartesianTransformationOperator3D(shared_ptr<IfcDirection>axis1, shared_ptr<IfcDirection>axis2, shared_ptr<IfcCartesianPoint> point, shared_ptr<IfcReal> real,  shared_ptr<IfcDirection>axis3);
@@ -128,7 +132,11 @@ public:
 
 	static std::shared_ptr<IfcBuildingStorey> GenIfcBuildingStorey(shared_ptr<IfcGloballyUniqueId> globalID, shared_ptr<IfcOwnerHistory> owner,
 		const char* name, const char* desc, const char* objtype, shared_ptr<IfcObjectPlacement> objplace, int elevation);
-	static std::unordered_map<int, shared_ptr<IfcBuildingStorey>> storeys;//´æ´¢Â¥²ãÐÅÏ¢
-
+	
+	static std::shared_ptr<IfcBeam> GenIfc::GeIfcBeam(shared_ptr<IfcOwnerHistory> owner,
+		const char* name, shared_ptr<IfcObjectPlacement> objplace, shared_ptr<IfcProductRepresentation> representation, IfcBeamTypeEnum e, int parentFloorID);
+		
+	static std::shared_ptr<IfcExtrudedAreaSolid> GenIfcExtrudedAreaSolid(shared_ptr<IfcProfileDef> profile, shared_ptr<IfcDirection> direction, int depth);
+	static std::shared_ptr<IfcProfileDef> GenIfcProfileDef(int type, std::string parameter);
 };
 #endif
